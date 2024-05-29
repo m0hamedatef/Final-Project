@@ -5,7 +5,7 @@ pipeline {
         // Credentials ID from AWS Credentials Plugin
         AWS_ACCESS_KEY_ID = credentials('access-key')
         AWS_SECRET_ACCESS_KEY = credentials('secret-key')
-        ECR_REPOSITORY_URI= '637423558559.dkr.ecr.us-east-1.amazonaws.com/h-project-ecr'
+        ECR_REPOSITORY_URI= '637423558559.dkr.ecr.eu-west-1.amazonaws.com/ecr-myhub'
         AWS_REGION = 'eu-west-1'
     }
 
