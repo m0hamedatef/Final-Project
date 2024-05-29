@@ -27,8 +27,8 @@ pipeline {
          }
          stage('Kubernetes Edit Files') {
              steps {
-                    sh "sed -i 's|image:.*|image: ${ECR_REPOSITORY_URI}/ecr-myhub:${BUILD_NUMBER}|g' ./k8s/backend.yaml"
-                    sh "sed -i 's|image:.*|image: ${ECR_REPOSITORY_URI}/ecr-myhub:${BUILD_NUMBER}|g' ./k8s/frontend.yaml"
+                    sh "sed -i 's|image:.*|image: ${ECR_REPOSITORY_URI}/ecr-myhub:${BUILD_NUMBER}|g' ./k8s/backend-deployment.yaml"
+                    sh "sed -i 's|image:.*|image: ${ECR_REPOSITORY_URI}/ecr-myhub:${BUILD_NUMBER}|g' ./k8s/frontend-deployment.yml"
                       sh "aws eks update-kubeconfig --region eu-west-1 --name nti "
              }
         }
@@ -37,7 +37,7 @@ pipeline {
         stage('apply database') {
             steps {
              
-                 sh 'kubectl apply -f ./k8s/mongo-deplyment.yaml '  
+                 sh 'kubectl apply -f ./k8s/mongo-depolyment.yaml '  
                  sh 'kubectl apply -f ./k8s/mongo-pvc.yaml '
                  sh 'kubectl apply -f ./k8s/mongo-svc.yaml '
             }
@@ -52,8 +52,8 @@ pipeline {
 
         stage('apply frontend') {
             steps {
-                sh 'kubectl apply -f ./k8s/frontend-deployment.yaml '  
-                sh 'kubectl apply -f ./k8s/frontend_svc.yml '  
+                sh 'kubectl apply -f ./k8s/frontend-deployment.yml '  
+                sh 'kubectl apply -f ./k8s/frontend_svc.yaml '  
             }
         }
 
