@@ -76,5 +76,52 @@
         dest: "/tmp"
         remote_src: yes
 
-    - name: Install AWS CLI
-      command: "/tmp/aws/install" 
+    - name: Install or Update AWS CLI
+      command: "/tmp/aws/install --update"
+
+    - name: Get the stable kubectl version
+      shell: "curl -sL https://dl.k8s.io/release/stable.txt"
+      register: kubectl_version
+      changed_when: false
+      failed_when: kubectl_version.stdout is undefined or kubectl_version.stdout == '' or kubectl_version.stdout | regex_search('html')
+
+    - name: Debug kubectl version
+      debug:
+        msg: "kubectl version: {{ kubectl_version.stdout }}"
+
+    - name: Download kubectl binary
+      get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+        dest: /tmp/kubectl
+        mode: '0755'
+      when: kubectl_version.stdout is defined and kubectl_version.stdout != '' and not kubectl_version.stdout | regex_search('html')
+
+    - name: Download kubectl checksum
+      get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl.sha256"
+        dest: /tmp/kubectl.sha256
+        mode: '0644'
+      when: kubectl_version.stdout is defined and kubectl_version.stdout != '' and not kubectl_version.stdout | regex_search('html')
+
+    - name: Verify kubectl binary
+      shell: |
+        echo "$(cat /tmp/kubectl.sha256)  /tmp/kubectl" | sha256sum --check
+      register: kubectl_checksum
+      when: kubectl_version.stdout is defined and kubectl_version.stdout != '' and not kubectl_version.stdout | regex_search('html')
+
+    - name: Install kubectl
+      become: true
+      copy:
+        src: /tmp/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+        remote_src: yes
+      when: kubectl_checksum.rc == 0
+
+    - name: Verify kubectl version
+      command: kubectl version --client
+      register: kubectl_version_check
+      changed_when: false
+
+    - debug:
+        msg: "kubectl version: {{ kubectl_version_check.stdout }}"
