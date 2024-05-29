@@ -46,14 +46,14 @@ pipeline {
         stage('apply backend') {
             steps {
                   sh 'kubectl apply -f ./k8s/backend-deployment.yaml '  
-                  sh 'kubectl apply -f ./k8s/backend_svc.yaml '  
+                  sh 'kubectl apply -f ./k8s/backend-svc.yaml '  
             }
         }
 
         stage('apply frontend') {
             steps {
                 sh 'kubectl apply -f ./k8s/frontend-deployment.yml '  
-                sh 'kubectl apply -f ./k8s/frontend_svc.yaml '  
+                sh 'kubectl apply -f ./k8s/frontend-svc.yaml '  
             }
         }
 
