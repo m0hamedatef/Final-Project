@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: backend-container
-        image: 637423558559.dkr.ecr.us-east-1.amazonaws.com/h-project-ecr/backend-image:latest
+        image: 637423558559.dkr.ecr.eu-west-1.amazonaws.com/ecr-myhub/backend-image:latest
         ports:
         - containerPort: 3001
         env:
