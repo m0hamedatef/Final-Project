@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    environment {
+        // Credentials ID from AWS Credentials Plugin
+        AWS_ACCESS_KEY_ID = credentials('aws_access_key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_key')
+        ECR_REPOSITORY_URI= '637423558559.dkr.ecr.eu-west-1.amazonaws.com/ecr-myhub'
+        AWS_REGION = 'eu-west-1'
+    }
+
+    stages {
+         stage('Build Docker Image front') {
+             steps {
+               
+                 sh 'docker build -t ${ECR_REPOSITORY_URI}/project-repo:${BUILD_NUMBER} ./frontend/.'
+                 sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPOSITORY_URI}'
+                 sh 'docker push ${ECR_REPOSITORY_URI}/project-repo:${BUILD_NUMBER}'
+             }
+         }
+         stage('Build Docker Image back') {
+             steps {
+                 sh 'docker build -t ${ECR_REPOSITORY_URI}/my-ecr-repo:${BUILD_NUMBER} ./backend/.'
+                 sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPOSITORY_URI}'
+                 sh 'docker push ${ECR_REPOSITORY_URI}/my-ecr-repo:${BUILD_NUMBER}'
+             }
+         }
+         stage('Kubernetes Edit Files') {
+             steps {
+                    sh "sed -i 's|image:.*|image: ${ECR_REPOSITORY_URI}/my-ecr-repo:${BUILD_NUMBER}|g' ./k8s/backend.yaml"
+                    sh "sed -i 's|image:.*|image: ${ECR_REPOSITORY_URI}/project-repo:${BUILD_NUMBER}|g' ./k8s/frontend.yaml"
+                      sh "aws eks update-kubeconfig --region eu-west-1 --name nti "
+             }
+        }
+
+        
+        stage('apply database') {
+            steps {
+             
+                 sh 'kubectl apply -f ./k8s/mongo-deplyment.yaml '  
+                 sh 'kubectl apply -f ./k8s/mongo-pvc.yaml '
+                 sh 'kubectl apply -f ./k8s/mongo-svc.yaml '
+            }
+        }
+
+        stage('apply backend') {
+            steps {
+                  sh 'kubectl apply -f ./k8s/backend-deployment.yaml '  
+                  sh 'kubectl apply -f ./k8s/backend_svc.yaml '  
+            }
+        }
+
+        stage('apply frontend') {
+            steps {
+                sh 'kubectl apply -f ./k8s/frontend-deployment.yaml '  
+                sh 'kubectl apply -f ./k8s/frontend_svc.yml '  
+            }
+        }
+
+    }
+}

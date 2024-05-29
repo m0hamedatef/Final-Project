@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend-container
+        image: 767397735708.dkr.ecr.eu-west-1.amazonaws.com/h-project-ecr/frontend-image:latest
+        ports:
+        - containerPort: 3000

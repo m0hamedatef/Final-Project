@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image: 767397735708.dkr.ecr.eu-west-1.amazonaws.com/h-project-ecr/backend-image:latest
+        ports:
+        - containerPort: 3001
+        env:
+          - name: MONGO_URL
+            value: "mongodb://root:123@mongo:27017/todos?authSource=admin"

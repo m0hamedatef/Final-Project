@@ -1,0 +1,80 @@
+---
+- hosts: all  # Replace with your target host(s)
+  become: true
+
+  tasks:
+    # Install Java
+    - name: Install Java OpenJDK
+      apt:
+        name: openjdk-11-jre
+        update_cache: yes
+        state: present
+
+    # Add Jenkins repository key
+    - name: Add Jenkins repository key
+      apt_key:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        state: present
+
+    # Add Jenkins repository
+    - name: Add Jenkins repository
+      apt_repository:
+        repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+        state: present
+
+    # Update package lists
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        state: present
+
+    # Install Jenkins
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    # Start Jenkins service and enable on boot
+    - name: Start and enable Jenkins service
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Add user to Docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    - name: Ensure Docker is started and enabled
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install dependencies
+      apt:
+        name:
+          - unzip
+          - curl
+        state: present
+
+    - name: Download AWS CLI
+      get_url:
+        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: "/tmp/awscliv2.zip"
+
+    - name: Unzip AWS CLI package
+      unarchive:
+        src: "/tmp/awscliv2.zip"
+        dest: "/tmp"
+        remote_src: yes
+
+    - name: Install AWS CLI
+      command: "/tmp/aws/install" 
