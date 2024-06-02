@@ -1,4 +1,6 @@
-# Cloud-Native-App-Pipeline# NTI-Final
+NTI-Final Project
+![final-NTI](https://github.com/m0hamedatef/Final-Project/assets/58785009/da5a640a-d7d9-4157-8e4d-f184aad348d5)
+
 1- Terraform:
 -create EKS Cluster consists of two nodes with auto scaling group and ELB
 
